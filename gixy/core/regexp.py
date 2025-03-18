@@ -1,4 +1,3 @@
-import six
 import logging
 import re
 import random
@@ -13,7 +12,7 @@ LOG = logging.getLogger(__name__)
 def _build_reverse_list(original):
     result = []
     for c in range(1, 126):
-        c = six.unichr(c)
+        c = chr(c)
         if c not in original:
             result.append(c)
     return frozenset(result)
@@ -35,7 +34,7 @@ CATEGORIES = {
                                                                '0123456789_')),
     sre_parse.CATEGORY_LINEBREAK: frozenset('\n'),
     sre_parse.CATEGORY_NOT_LINEBREAK: _build_reverse_list(frozenset('\n')),
-    'ANY': [six.unichr(x) for x in range(1, 127) if x != 10]
+    'ANY': [chr(x) for x in range(1, 127) if x != 10]
 }
 
 CATEGORIES_NAMES = {
@@ -94,10 +93,10 @@ def _gen_combinator(variants, _merge=True):
         producted = itertools.product(*res)
         if _merge:
             # TODO(buglloc): ??!
-            return list(six.moves.map(_merge_variants, producted))
+            return list(map(_merge_variants, producted))
         return producted
     elif _merge:
-        return list(six.moves.map(_merge_variants, [res]))
+        return list(map(_merge_variants, [res]))
     return res
 
 
@@ -178,7 +177,7 @@ class LiteralToken(Token):
     type = sre_parse.LITERAL
 
     def _parse(self):
-        self.char = six.unichr(self.token[1])
+        self.char = chr(self.token[1])
 
     def can_contain(self, char, skip_literal=True):
         if skip_literal:
@@ -199,7 +198,7 @@ class NotLiteralToken(Token):
     type = sre_parse.NOT_LITERAL
 
     def _parse(self):
-        self.char = six.unichr(self.token[1])
+        self.char = chr(self.token[1])
         self.gen_char_list = list(_build_reverse_list(frozenset(self.char)))
 
     def can_contain(self, char, skip_literal=True):
@@ -225,8 +224,8 @@ class RangeToken(Token):
     def _parse(self):
         self.left_code = self.token[1][0]
         self.right_code = self.token[1][1]
-        self.left = six.unichr(self.left_code)
-        self.right = six.unichr(self.right_code)
+        self.left = chr(self.left_code)
+        self.right = chr(self.right_code)
 
     def can_contain(self, char, skip_literal=True):
         return self.left <= char <= self.right
@@ -238,7 +237,7 @@ class RangeToken(Token):
         if self.can_contain(context.char):
             return context.char
 
-        return six.unichr(random.randint(self.token[1][0], self.token[1][1]))
+        return chr(random.randint(self.token[1][0], self.token[1][1]))
 
     def __str__(self):
         return '{left}-{right}'.format(left=self.left, right=self.right)
@@ -657,7 +656,7 @@ class InToken(Token):
             elif isinstance(child, LiteralToken):
                 blacklisted.add(child.char)
             elif isinstance(child, RangeToken):
-                blacklisted.update(six.unichr(c) for c in six.moves.range(child.left_code, child.right_code + 1))
+                blacklisted.update(chr(c) for c in range(child.left_code, child.right_code + 1))
             elif isinstance(child, CategoryToken):
                 blacklisted.update(child.char_list)
             else:
