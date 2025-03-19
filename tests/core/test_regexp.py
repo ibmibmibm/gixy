@@ -97,6 +97,7 @@ def test_to_string():
         (r'1*', '1*'),
         (r'1*?', '1*?'),
         (r'1+', '1+'),
+        (r'(?>abc)def', '(?>abc)def'),
     )
     for case in cases:
         regexp, string = case
